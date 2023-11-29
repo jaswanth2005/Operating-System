@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILES 100
+#define MAX_FILE_NAME 30
+
+typedef struct {
+    char name[MAX_FILE_NAME];
+} File;
+
+typedef struct {
+    File files[MAX_FILES];
+    int fileCount;
+} Directory;
+
+void initializeDirectory(Directory *dir);
+void displayFiles(Directory *dir);
+int createFile(Directory *dir, char *fileName);
+int deleteFile(Directory *dir, char *fileName);
+
+int main() {
+    Directory directory;
+    initializeDirectory(&directory);
+
+    int choice;
+    char fileName[MAX_FILE_NAME];
+
+    do {
+        printf("\n1. Display Files\n");
+        printf("2. Create File\n");
+        printf("3. Delete File\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                displayFiles(&directory);
+                break;
+            case 2:
+                printf("Enter the file name to create: ");
+                scanf("%s", fileName);
+                if (createFile(&directory, fileName)) {
+                    printf("File created successfully.\n");
+                } else {
+                    printf("Failed to create file. Directory is full or file already exists.\n");
+                }
+                break;
+            case 3:
+                printf("Enter the file name to delete: ");
+                scanf("%s", fileName);
+                if (deleteFile(&directory, fileName)) {
+                    printf("File deleted successfully.\n");
+                } else {
+                    printf("File not found.\n");
+                }
+                break;
+            case 4:
+                printf("Exiting program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+
+void initializeDirectory(Directory *dir) {
+    dir->fileCount = 0;
+}
+
+void displayFiles(Directory *dir) {
+    if (dir->fileCount == 0) {
+        printf("Directory is empty.\n");
+    } else {
+        printf("Files in the directory:\n");
+        for (int i = 0; i < dir->fileCount; ++i) {
+            printf("%s\n", dir->files[i].name);
+        }
+    }
+}
+
+int createFile(Directory *dir, char *fileName) {
+    if (dir->fileCount < MAX_FILES) {
+        // Check if the file already exists
+        for (int i = 0; i < dir->fileCount; ++i) {
+            if (strcmp(dir->files[i].name, fileName) == 0) {
+                return 0;  // File already exists
+            }
+        }
+
+        // Add the new file to the directory
+        strcpy(dir->files[dir->fileCount].name, fileName);
+        dir->fileCount++;
+        return 1;  // File created successfully
+    } else {
+        return 0;  // Directory is full
+    }
+}
+
+int deleteFile(Directory *dir, char *fileName) {
+    int found = 0;
+    for (int i = 0; i < dir->fileCount; ++i) {
+        if (strcmp(dir->files[i].name, fileName) == 0) {
+            // Shift remaining files to fill the gap
+            for (int j = i; j < dir->fileCount - 1; ++j) {
+                strcpy(dir->files[j].name, dir->files[j + 1].name);
+            }
+            dir->fileCount--;
+            found = 1;
+            break;
+        }
+    }
+    return found;
+}
