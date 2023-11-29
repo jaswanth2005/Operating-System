@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_DIRECTORIES 10
+#define MAX_FILES_PER_DIRECTORY 10
+#define MAX_DIRECTORY_NAME 30
+#define MAX_FILE_NAME 30
+
+typedef struct {
+    char name[MAX_DIRECTORY_NAME];
+    int fileCount;
+    char files[MAX_FILES_PER_DIRECTORY][MAX_FILE_NAME];
+} SubDirectory;
+
+typedef struct {
+    char name[MAX_DIRECTORY_NAME];
+    int subDirCount;
+    SubDirectory subDirs[MAX_DIRECTORIES];
+} Directory;
+
+void initializeFileSystem(Directory *root);
+void displayFileSystem(Directory *root);
+int createFile(Directory *root, char *dirName, char *fileName);
+int deleteFile(Directory *root, char *dirName, char *fileName);
+
+int main() {
+    Directory root;
+    initializeFileSystem(&root);
+
+    int choice;
+    char dirName[MAX_DIRECTORY_NAME];
+    char fileName[MAX_FILE_NAME];
+
+    do {
+        printf("\n1. Display File System\n");
+        printf("2. Create File\n");
+        printf("3. Delete File\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                displayFileSystem(&root);
+                break;
+            case 2:
+                printf("Enter the directory name to create file: ");
+                scanf("%s", dirName);
+                printf("Enter the file name to create: ");
+                scanf("%s", fileName);
+                if (createFile(&root, dirName, fileName)) {
+                    printf("File created successfully.\n");
+                } else {
+                    printf("Failed to create file. Directory not found or file already exists.\n");
+                }
+                break;
+            case 3:
+                printf("Enter the directory name to delete file: ");
+                scanf("%s", dirName);
+                printf("Enter the file name to delete: ");
+                scanf("%s", fileName);
+                if (deleteFile(&root, dirName, fileName)) {
+                    printf("File deleted successfully.\n");
+                } else {
+                    printf("File not found or directory not found.\n");
+                }
+                break;
+            case 4:
+                printf("Exiting program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+
+void initializeFileSystem(Directory *root) {
+    strcpy(root
