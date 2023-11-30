@@ -1,0 +1,250 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_PROCESS 10
+#define MAX_RESOURCE 10
+
+// Function prototypes
+void initialize(int processes, int resources, int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]);
+bool isSafe(int processes, int resources, int available[MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]);
+void requestResource(int process, int resources, int request[MAX_RESOURCE], int available[MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]);
+void releaseResource(int process, int resources, int release[MAX_RESOURCE], int available[MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE]);
+
+int main() {
+    int processes, resources;
+    
+    printf("Enter the number of processes: ");
+    scanf("%d", &processes);
+    
+    printf("Enter the number of resources: ");
+    scanf("%d", &resources);
+    
+    int max[MAX_PROCESS][MAX_RESOURCE];
+    int allocated[MAX_PROCESS][MAX_RESOURCE];
+    int need[MAX_PROCESS][MAX_RESOURCE];
+    int available[MAX_RESOURCE];
+
+    // Initialize the system
+    initialize(processes, resources, max, allocated, need);
+
+    // Display initial state
+    printf("\nInitial State:\n");
+    printf("Processes   Allocation   Max   Need\n");
+    for (int i = 0; i < processes; i++) {
+        printf("P%d          ", i);
+        for (int j = 0; j < resources; j++) {
+            printf("%d ", allocated[i][j]);
+        }
+        printf("         ");
+        for (int j = 0; j < resources; j++) {
+            printf("%d ", max[i][j]);
+        }
+        printf("         ");
+        for (int j = 0; j < resources; j++) {
+            printf("%d ", need[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Execute requests
+    int choice, process;
+    do {
+        printf("\n1. Request Resources\n");
+        printf("2. Release Resources\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter process number (P0, P1, ..., P%d): ", processes - 1);
+                scanf("%d", &process);
+                requestResource(process, resources, available, max, allocated, need);
+                break;
+            case 2:
+                printf("Enter process number (P0, P1, ..., P%d): ", processes - 1);
+                scanf("%d", &process);
+                releaseResource(process, resources, available, allocated);
+                break;
+            case 3:
+                break;
+            default:
+                printf("Invalid choice! Please enter 1, 2, or 3.\n");
+        }
+
+        // Display current state
+        printf("\nCurrent State:\n");
+        printf("Processes   Allocation   Max   Need\n");
+        for (int i = 0; i < processes; i++) {
+            printf("P%d          ", i);
+            for (int j = 0; j < resources; j++) {
+                printf("%d ", allocated[i][j]);
+            }
+            printf("         ");
+            for (int j = 0; j < resources; j++) {
+                printf("%d ", max[i][j]);
+            }
+            printf("         ");
+            for (int j = 0; j < resources; j++) {
+                printf("%d ", need[i][j]);
+            }
+            printf("\n");
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
+
+// Initialize the system
+void initialize(int processes, int resources, int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]) {
+    printf("\nEnter the maximum resources required for each process:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("For P%d: ", i);
+        for (int j = 0; j < resources; j++) {
+            scanf("%d", &max[i][j]);
+        }
+    }
+
+    printf("\nEnter the allocated resources for each process:\n");
+    for (int i = 0; i < processes; i++) {
+        printf("For P%d: ", i);
+        for (int j = 0; j < resources; j++) {
+            scanf("%d", &allocated[i][j]);
+        }
+    }
+
+    // Calculate the need matrix
+    for (int i = 0; i < processes; i++) {
+        for (int j = 0; j < resources; j++) {
+            need[i][j] = max[i][j] - allocated[i][j];
+        }
+    }
+
+    // Calculate the available resources
+    int total[MAX_RESOURCE] = {0};
+    for (int i = 0; i < processes; i++) {
+        for (int j = 0; j < resources; j++) {
+            total[j] += allocated[i][j];
+        }
+    }
+
+    for (int j = 0; j < resources; j++) {
+        available[j] = total[j];
+    }
+}
+
+// Check if the system is in a safe state
+bool isSafe(int processes, int resources, int available[MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]) {
+    bool finish[processes];
+    int work[resources];
+
+    // Initialize finish array to false
+    for (int i = 0; i < processes; i++) {
+        finish[i] = false;
+    }
+
+    // Initialize work array to available resources
+    for (int j = 0; j < resources; j++) {
+        work[j] = available[j];
+    }
+
+    // Check for safety
+    for (int i = 0; i < processes; i++) {
+        if (!finish[i]) {
+            bool canAllocate = true;
+            for (int j = 0; j < resources; j++) {
+                if (need[i][j] > work[j]) {
+                    canAllocate = false;
+                    break;
+                }
+            }
+            if (canAllocate) {
+                // Simulate allocation
+                finish[i] = true;
+                for (int j = 0; j < resources; j++) {
+                    work[j] += allocated[i][j];
+                }
+                i = -1; // Start over from the beginning
+            }
+        }
+    }
+
+    // If all processes are finished, the system is in a safe state
+    for (int i = 0; i < processes; i++) {
+        if (!finish[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Simulate a resource request
+void requestResource(int process, int resources, int available[MAX_RESOURCE], int max[MAX_PROCESS][MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE], int need[MAX_PROCESS][MAX_RESOURCE]) {
+    int request[MAX_RESOURCE];
+
+    printf("Enter the request for resources from P%d: ", process);
+    for (int j = 0; j < resources; j++) {
+        scanf("%d", &request[j]);
+    }
+
+    // Check if the request is within the need matrix
+    for (int j = 0; j < resources; j++) {
+        if (request[j] > need[process][j]) {
+            printf("Error: Request exceeds maximum need. Try again.\n");
+            return;
+        }
+    }
+
+    // Check if the request is within the available resources
+    for (int j = 0; j < resources; j++) {
+        if (request[j] > available[j]) {
+            printf("Error: Insufficient resources. P%d must wait.\n", process);
+            return;
+        }
+    }
+
+    // Simulate resource allocation
+    for (int j = 0; j < resources; j++) {
+        available[j] -= request[j];
+        allocated[process][j] += request[j];
+        need[process][j] -= request[j];
+    }
+
+    // Check if the system is in a safe state after the allocation
+    if (isSafe(MAX_PROCESS, MAX_RESOURCE, available, max, allocated, need)) {
+        printf("Resource request granted. P%d is in a safe state.\n", process);
+    } else {
+        // Rollback the allocation if it results in an unsafe state
+        for (int j = 0; j < resources; j++) {
+            available[j] += request[j];
+            allocated[process][j] -= request[j];
+            need[process][j] += request[j];
+        }
+        printf("Resource request denied. P%d would be in an unsafe state.\n", process);
+    }
+}
+
+// Simulate releasing resources
+void releaseResource(int process, int resources, int release[MAX_RESOURCE], int available[MAX_RESOURCE], int allocated[MAX_PROCESS][MAX_RESOURCE]) {
+    printf("Enter the resources to release from P%d: ", process);
+    for (int j = 0; j < resources; j++) {
+        scanf("%d", &release[j]);
+    }
+
+    // Check if the release is within the allocated resources
+    for (int j = 0; j < resources; j++) {
+        if (release[j] > allocated[process][j]) {
+            printf("Error: Cannot release more resources than allocated. Try again.\n");
+            return;
+        }
+    }
+
+    // Simulate resource release
+    for (int j = 0; j < resources; j++) {
+        available[j] += release[j];
+        allocated[process][j] -= release[j];
+    }
+
+    printf("Resources released successfully.\n");
+}
