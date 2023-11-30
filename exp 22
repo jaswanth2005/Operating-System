@@ -1,0 +1,97 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 100
+
+// Structure to represent a memory block
+struct MemoryBlock {
+    int id;
+    int size;
+    int allocated;
+};
+
+// Function prototypes
+void initializeMemory(struct MemoryBlock memory[], int numBlocks);
+void displayMemory(struct MemoryBlock memory[], int numBlocks);
+int bestFit(struct MemoryBlock memory[], int numBlocks, int processSize);
+
+int main() {
+    // Number of memory blocks
+    int numBlocks;
+
+    printf("Enter the number of memory blocks: ");
+    scanf("%d", &numBlocks);
+
+    // Create an array of memory blocks
+    struct MemoryBlock memory[MAX_BLOCKS];
+
+    // Initialize memory blocks
+    initializeMemory(memory, numBlocks);
+
+    // Display initial state of memory
+    printf("\nInitial state of memory:\n");
+    displayMemory(memory, numBlocks);
+
+    // Number of processes
+    int numProcesses;
+
+    printf("\nEnter the number of processes: ");
+    scanf("%d", &numProcesses);
+
+    // Allocate memory for each process using best fit algorithm
+    for (int i = 1; i <= numProcesses; ++i) {
+        int processSize;
+
+        printf("\nEnter size of process %d: ", i);
+        scanf("%d", &processSize);
+
+        int blockIndex = bestFit(memory, numBlocks, processSize);
+
+        if (blockIndex != -1) {
+            // Allocate memory for the process
+            memory[blockIndex].allocated = 1;
+            printf("Process %d allocated to Memory Block %d.\n", i, blockIndex + 1);
+        } else {
+            printf("Process %d cannot be allocated. No suitable block found.\n", i);
+        }
+
+        // Display updated state of memory
+        displayMemory(memory, numBlocks);
+    }
+
+    return 0;
+}
+
+// Function to initialize memory blocks
+void initializeMemory(struct MemoryBlock memory[], int numBlocks) {
+    for (int i = 0; i < numBlocks; ++i) {
+        memory[i].id = i + 1;
+        memory[i].size = 0;
+        memory[i].allocated = 0;
+    }
+}
+
+// Function to display memory blocks
+void displayMemory(struct MemoryBlock memory[], int numBlocks) {
+    printf("\nMemory Block\tSize\tStatus\n");
+    for (int i = 0; i < numBlocks; ++i) {
+        printf("%d\t\t%d\t%s\n", memory[i].id, memory[i].size,
+               memory[i].allocated ? "Allocated" : "Free");
+    }
+}
+
+// Function to find the best fit for a process in memory
+int bestFit(struct MemoryBlock memory[], int numBlocks, int processSize) {
+    int bestFitIndex = -1;
+    int minSize = __INT_MAX__;
+
+    for (int i = 0; i < numBlocks; ++i) {
+        if (!memory[i].allocated && memory[i].size >= processSize) {
+            if (memory[i].size < minSize) {
+                minSize = memory[i].size;
+                bestFitIndex = i;
+            }
+        }
+    }
+
+    return bestFitIndex;
+}
