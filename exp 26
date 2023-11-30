@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FILENAME "example_file.txt"
+#define BUFFER_SIZE 100
+
+int main() {
+    FILE *file;
+
+    // 1. Create a new file
+    file = fopen(FILENAME, "w");
+
+    if (file == NULL) {
+        perror("Error creating file");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("File created successfully.\n");
+
+    // 2. Write data to the file
+    const char *dataToWrite = "Hello, this is a demonstration of file management operations.";
+
+    if (fputs(dataToWrite, file) == EOF) {
+        perror("Error writing to file");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Data written to file successfully.\n");
+
+    // 3. Close the file
+    fclose(file);
+
+    // 4. Open the file for reading
+    file = fopen(FILENAME, "r");
+
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        exit(EXIT_FAILURE);
+    }
+
+    // 5. Read data from the file
+    char buffer[BUFFER_SIZE];
+
+    if (fgets(buffer, sizeof(buffer), file) == NULL) {
+        perror("Error reading from file");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Data read from file:\n%s\n", buffer);
+
+    // 6. Close the file
+    fclose(file);
+
+    // 7. Open the file for appending
+    file = fopen(FILENAME, "a");
+
+    if (file == NULL) {
+        perror("Error opening file for appending");
+        exit(EXIT_FAILURE);
+    }
+
+    // 8. Append data to the file
+    const char *dataToAppend = "\nThis line is appended to the file.";
+
+    if (fputs(dataToAppend, file) == EOF) {
+        perror("Error appending to file");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Data appended to file successfully.\n");
+
+    // 9. Close the file
+    fclose(file);
+
+    return 0;
+}
