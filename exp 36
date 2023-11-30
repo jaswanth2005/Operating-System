@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent a disk block
+struct DiskBlock {
+    int data;
+    struct DiskBlock* next;
+};
+
+// Structure to represent a file
+struct File {
+    struct DiskBlock* first_block;
+    struct DiskBlock* last_block;
+};
+
+// Function to initialize a file with no blocks
+void initFile(struct File* file) {
+    file->first_block = NULL;
+    file->last_block = NULL;
+}
+
+// Function to allocate a new block to a file
+struct DiskBlock* allocateBlock(int data) {
+    struct DiskBlock* block = (struct DiskBlock*)malloc(sizeof(struct DiskBlock));
+    if (block != NULL) {
+        block->data = data;
+        block->next = NULL;
+    }
+    return block;
+}
+
+// Function to add a block to the end of a file
+void addBlockToEnd(struct File* file, int data) {
+    struct DiskBlock* new_block = allocateBlock(data);
+    if (new_block == NULL) {
+        printf("Error: Unable to allocate a new block.\n");
+        return;
+    }
+
+    if (file->last_block == NULL) {
+        // If the file is empty, update both first and last pointers
+        file->first_block = new_block;
+        file->last_block = new_block;
+    } else {
+        // Otherwise, add the new block to the end of the file
+        file->last_block->next = new_block;
+        file->last_block = new_block;
+    }
+
+    printf("Block with data %d added to the file.\n", data);
+}
+
+// Function to display the blocks of a file
+void displayBlocks(struct File* file) {
+    printf("Block allocation for the file:\n");
+    struct DiskBlock* current_block = file->first_block;
+    while (current_block != NULL) {
+        printf("Block with data %d\n", current_block->data);
+        current_block = current_block->next;
+    }
+}
+
+// Function to deallocate all blocks of a file
+void deallocateFile(struct File* file) {
+    struct DiskBlock* current_block = file->first_block;
+    struct DiskBlock* next_block;
+
+    while (current_block != NULL) {
+        next_block = current_block->next;
+        free(current_block);
+        current_block = next_block;
+    }
+
+    // Reset file pointers after deallocation
+    file->first_block = NULL;
+    file->last_block = NULL;
+}
+
+int main() {
+    struct File myFile;
+    initFile(&myFile);
+
+    // Simulate file allocation by adding blocks
+    addBlockToEnd(&myFile, 1);
+    addBlockToEnd(&myFile, 2);
+    addBlockToEnd(&myFile, 3);
+
+    // Display the block allocation of the file
+    displayBlocks(&myFile);
+
+    // Deallocate the file
+    deallocateFile(&myFile);
+
+    return 0;
+}
