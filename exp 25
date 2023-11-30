@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+#define BUFFER_SIZE 100
+
+int main() {
+    int fileDescriptor;
+    ssize_t bytesRead;
+    char buffer[BUFFER_SIZE];
+
+    // Open a file using open system call
+    fileDescriptor = open("example_file.txt", O_RDONLY);
+
+    if (fileDescriptor == -1) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read content from the file
+    bytesRead = read(fileDescriptor, buffer, sizeof(buffer));
+
+    if (bytesRead == -1) {
+        perror("Error reading from file");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+
+    buffer[bytesRead] = '\0'; // Null-terminate the string
+
+    printf("Data read from file:\n%s\n", buffer);
+
+    // Use lseek to move the file cursor to a specific position
+    lseek(fileDescriptor, 0, SEEK_SET); // Move the file cursor to the beginning
+
+    // Get file information using stat
+    struct stat fileStat;
+
+    if (fstat(fileDescriptor, &fileStat) == -1) {
+        perror("Error getting file information");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("\nFile Information:\n");
+    printf("Size: %ld bytes\n", fileStat.st_size);
+    printf("Permissions: %o\n", fileStat.st_mode & 0777);
+    printf("Last accessed: %s", ctime(&fileStat.st_atime));
+
+    // Use opendir and readdir to list files in the current directory
+    DIR *directory;
+    struct dirent *dirEntry;
+
+    directory = opendir(".");
+
+    if (directory == NULL) {
+        perror("Error opening directory");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("\nFiles in the current directory:\n");
+
+    while ((dirEntry = readdir(directory)) != NULL) {
+        printf("%s\n", dirEntry->d_name);
+    }
+
+    // Close the file and directory
+    closedir(directory);
+    close(fileDescriptor);
+
+    return 0;
+}
