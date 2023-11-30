@@ -1,0 +1,71 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void cScanDisk(int request[], int head, int n) {
+    int distance, seek_sequence[n + 1];
+
+    // Sort the request array
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (request[j] > request[j + 1]) {
+                // Swap the requests if they are out of order
+                int temp = request[j];
+                request[j] = request[j + 1];
+                request[j + 1] = temp;
+            }
+        }
+    }
+
+    int seek_count = 0;
+    int current_head = head;
+
+    // Move in one direction (left to right)
+    for (int i = 0; i < n; i++) {
+        if (request[i] >= current_head) {
+            seek_sequence[seek_count++] = request[i] - current_head;
+            current_head = request[i];
+        }
+    }
+
+    // Move to the beginning of the disk
+    seek_sequence[seek_count++] = current_head;
+
+    // Move in the same direction (left to right)
+    for (int i = 0; i < n; i++) {
+        seek_sequence[seek_count++] = request[i];
+    }
+
+    printf("C-SCAN Disk Scheduling Sequence: ");
+    for (int i = 0; i < seek_count; i++) {
+        printf("%d ", seek_sequence[i]);
+    }
+
+    int total_seek_time = 0;
+    for (int i = 0; i < seek_count; i++) {
+        total_seek_time += seek_sequence[i];
+    }
+
+    printf("\nTotal Seek Time: %d\n", total_seek_time);
+}
+
+int main() {
+    int n, head;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    int request[n];
+
+    printf("Enter the request sequence:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Request %d: ", i + 1);
+        scanf("%d", &request[i]);
+    }
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &head);
+
+    cScanDisk(request, head, n);
+
+    return 0;
+}
