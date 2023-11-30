@@ -1,0 +1,58 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void findWaitingTime(int request[], int n, int seek_sequence[]) {
+    seek_sequence[0] = 0;
+    for (int i = 1; i < n; i++)
+        seek_sequence[i] = abs(request[i] - request[i - 1]);
+}
+
+void findTurnAroundTime(int request[], int n, int wait_time[], int turn_around_time[]) {
+    for (int i = 0; i < n; i++)
+        turn_around_time[i] = wait_time[i] + abs(request[i] - request[0]);
+}
+
+void findAverageTime(int request[], int n) {
+    int seek_sequence[n], wait_time[n], turn_around_time[n];
+    
+    findWaitingTime(request, n, seek_sequence);
+    
+    int total_seek_time = 0;
+    for (int i = 0; i < n; i++) {
+        total_seek_time += seek_sequence[i];
+        wait_time[i] = total_seek_time;
+    }
+    
+    findTurnAroundTime(request, n, wait_time, turn_around_time);
+    
+    double total_wait_time = 0, total_turn_around_time = 0;
+    for (int i = 0; i < n; i++) {
+        total_wait_time += wait_time[i];
+        total_turn_around_time += turn_around_time[i];
+    }
+    
+    double average_wait_time = total_wait_time / n;
+    double average_turn_around_time = total_turn_around_time / n;
+    
+    printf("Average Waiting Time: %.2lf\n", average_wait_time);
+    printf("Average Turn-Around Time: %.2lf\n", average_turn_around_time);
+}
+
+int main() {
+    int n;
+    
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+    
+    int request[n];
+    
+    printf("Enter the request sequence:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Request %d: ", i + 1);
+        scanf("%d", &request[i]);
+    }
+    
+    findAverageTime(request, n);
+    
+    return 0;
+}
