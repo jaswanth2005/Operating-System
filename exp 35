@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BLOCK_SIZE 512
+#define MAX_BLOCKS 100
+
+// Structure to represent a file
+struct File {
+    int blocks[MAX_BLOCKS]; // Array to store block pointers
+    int num_blocks;         // Number of blocks allocated to the file
+};
+
+// Function to initialize a file with no allocated blocks
+void initFile(struct File *file) {
+    file->num_blocks = 0;
+}
+
+// Function to allocate a block to a file
+void allocateBlock(struct File *file, int block_number) {
+    if (file->num_blocks < MAX_BLOCKS) {
+        file->blocks[file->num_blocks] = block_number;
+        file->num_blocks++;
+        printf("Block %d allocated to the file.\n", block_number);
+    } else {
+        printf("File is full. Cannot allocate more blocks.\n");
+    }
+}
+
+// Function to display the block allocation of a file
+void displayBlocks(struct File *file) {
+    printf("Block allocation for the file:\n");
+    for (int i = 0; i < file->num_blocks; i++) {
+        printf("Block %d\n", file->blocks[i]);
+    }
+}
+
+int main() {
+    struct File myFile;
+    initFile(&myFile);
+
+    // Simulate file allocation by allocating blocks
+    allocateBlock(&myFile, 1);
+    allocateBlock(&myFile, 2);
+    allocateBlock(&myFile, 3);
+
+    // Display the block allocation of the file
+    displayBlocks(&myFile);
+
+    return 0;
+}
