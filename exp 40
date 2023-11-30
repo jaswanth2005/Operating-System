@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+void displayPermissions(const char *filename) {
+    struct stat fileStat;
+
+    // Use stat to retrieve file information
+    if (stat(filename, &fileStat) == -1) {
+        perror("Error in stat");
+        return;
+    }
+
+    printf("File: %s\n", filename);
+    printf("Owner: %d\n", fileStat.st_uid);
+    printf("Group: %d\n", fileStat.st_gid);
+
+    // Display owner's permissions
+    printf("Owner's Permissions: ");
+    printf((fileStat.st_mode & S_IRUSR) ? "r" : "-");
+    printf((fileStat.st_mode & S_IWUSR) ? "w" : "-");
+    printf((fileStat.st_mode & S_IXUSR) ? "x" : "-");
+    printf("\n");
+
+    // Display group's permissions
+    printf("Group's Permissions: ");
+    printf((fileStat.st_mode & S_IRGRP) ? "r" : "-");
+    printf((fileStat.st_mode & S_IWGRP) ? "w" : "-");
+    printf((fileStat.st_mode & S_IXGRP) ? "x" : "-");
+    printf("\n");
+
+    // Display others' permissions
+    printf("Others' Permissions: ");
+    printf((fileStat.st_mode & S_IROTH) ? "r" : "-");
+    printf((fileStat.st_mode & S_IWOTH) ? "w" : "-");
+    printf((fileStat.st_mode & S_IXOTH) ? "x" : "-");
+    printf("\n");
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
+
+    displayPermissions(argv[1]);
+
+    return 0;
+}
