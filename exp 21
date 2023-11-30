@@ -1,0 +1,53 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+
+int main() {
+    int memory_blocks[MAX_BLOCKS], process_size, num_blocks, i, j;
+
+    // Initialize memory blocks with -1 to indicate unallocated blocks
+    for (i = 0; i < MAX_BLOCKS; i++) {
+        memory_blocks[i] = -1;
+    }
+
+    // Input the number of memory blocks
+    printf("Enter the number of memory blocks: ");
+    scanf("%d", &num_blocks);
+
+    // Input the size of each memory block
+    printf("Enter the size of each memory block:\n");
+    for (i = 0; i < num_blocks; i++) {
+        printf("Block %d: ", i + 1);
+        scanf("%d", &memory_blocks[i]);
+    }
+
+    // Input the size of the process
+    printf("Enter the size of the process: ");
+    scanf("%d", &process_size);
+
+    // Find the worst fit block
+    int worst_fit_index = -1;
+    for (i = 0; i < num_blocks; i++) {
+        if (memory_blocks[i] >= process_size) {
+            if (worst_fit_index == -1 || memory_blocks[i] > memory_blocks[worst_fit_index]) {
+                worst_fit_index = i;
+            }
+        }
+    }
+
+    // Allocate memory if a suitable block is found
+    if (worst_fit_index != -1) {
+        printf("Memory allocated at Block %d\n", worst_fit_index + 1);
+        memory_blocks[worst_fit_index] -= process_size;
+    } else {
+        printf("Not enough memory to allocate.\n");
+    }
+
+    // Display the updated memory blocks
+    printf("Updated Memory Blocks:\n");
+    for (i = 0; i < num_blocks; i++) {
+        printf("Block %d: %d\n", i + 1, memory_blocks[i]);
+    }
+
+    return 0;
+}
