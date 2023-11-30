@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_PAGES 10
+#define MAX_FRAMES 3
+
+int pageFrames[MAX_FRAMES];
+int pageOrder[MAX_PAGES];
+int pageFaults = 0;
+
+// Function to initialize page frames and page order
+void initialize() {
+    for (int i = 0; i < MAX_FRAMES; i++) {
+        pageFrames[i] = -1; // -1 indicates an empty frame
+    }
+    for (int i = 0; i < MAX_PAGES; i++) {
+        pageOrder[i] = -1; // -1 indicates that the page has not been accessed
+    }
+}
+
+// Function to display the content of page frames
+void display() {
+    printf("Page Frames: ");
+    for (int i = 0; i < MAX_FRAMES; i++) {
+        if (pageFrames[i] == -1) {
+            printf("[ ] ");
+        } else {
+            printf("[%d] ", pageFrames[i]);
+        }
+    }
+    printf("\n");
+}
+
+// Function to find the index of a page in page frames
+int findPage(int page) {
+    for (int i = 0; i < MAX_FRAMES; i++) {
+        if (pageFrames[i] == page) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Function to find the page that will not be used for the longest time
+int findOptimalPage(int start) {
+    for (int i = 0; i < MAX_FRAMES; i++) {
+        int framePage = pageFrames[i];
+        bool futureAccess = false;
+        for (int j = start + 1; j < MAX_PAGES; j++) {
+            if (pageOrder[j] == framePage) {
+                futureAccess = true;
+                break;
+            }
+        }
+        if (!futureAccess) {
+            return i;
+        }
+    }
+    return 0; // Default to the first frame if no page has no future access
+}
+
+// Function to simulate the Optimal paging algorithm
+void simulateOptimal(int pages[MAX_PAGES]) {
+    for (int i = 0; i < MAX_PAGES; i++) {
+        int currentPage = pages[i];
+        display();
+
+        if (findPage(currentPage) == -1) {
+            // Page fault
+            pageFaults++;
+            if (pageOrder[MAX_PAGES - 1] != -1) {
+                // Page order is full, perform Optimal replacement
+                int optimalIndex = findOptimalPage(i);
+                pageFrames[optimalIndex] = currentPage;
+            } else {
+                // Add the page to an empty frame
+                for (int j = 0; j < MAX_FRAMES; j++) {
+                    if (pageFrames[j] == -1) {
+                        pageFrames[j] = currentPage;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int pages[MAX_PAGES] = {0, 1, 2, 3, 2, 4, 3, 4, 5, 4, 6, 7, 8, 7, 8, 9, 7, 8, 9, 5};
+
+    initialize();
+    simulateOptimal(pages);
+
+    printf("Total Page Faults: %d\n", pageFaults);
+
+    return 0;
+}
