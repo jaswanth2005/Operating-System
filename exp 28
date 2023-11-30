@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_LINE_LENGTH 256
+
+int main(int argc, char *argv[]) {
+    FILE *file;
+    char line[MAX_LINE_LENGTH];
+
+    // Check for correct usage
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <pattern> <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    // Open the file for reading
+    file = fopen(argv[2], "r");
+
+    if (file == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Search for the pattern in each line of the file
+    printf("Lines matching pattern '%s' in file '%s':\n", argv[1], argv[2]);
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Check if the pattern is present in the line
+        if (strstr(line, argv[1]) != NULL) {
+            printf("%s", line);
+        }
+    }
+
+    // Close the file
+    fclose(file);
+
+    return 0;
+}
