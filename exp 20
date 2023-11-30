@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+// Shared variables
+int shared_data = 0;
+int reader_count = 0;
+
+// Semaphores
+sem_t mutex, wrt;
+
+// Reader function
+void *reader(void *arg) {
+    while (1) {
+        // Acquire the mutex to update reader_count
+        sem_wait(&mutex);
+        reader_count++;
+        if (reader_count == 1) {
+            // If this is the first reader, lock the write semaphore
+            sem_wait(&wrt);
+        }
+        // Release the mutex
+        sem_post(&mutex);
+
+        // Read shared data
+        printf("Reader %ld: Read Shared Data = %d\n", (long)arg, shared_data);
+
+        // Acquire the mutex to update reader_count
+        sem_wait(&mutex);
+        reader_count--;
+        if (reader_count == 0) {
+            // If this is the last reader, unlock the write semaphore
+            sem_post(&wrt);
+        }
+        // Release the mutex
+        sem_post(&mutex);
+
+        // Sleep for a random time to simulate variable reading time
+        usleep(rand() % 1000000);
+    }
+}
+
+// Writer function
+void *writer(void *arg) {
+    while (1) {
+        // Lock the write semaphore
+        sem_wait(&wrt);
+
+        // Write to shared data
+        shared_data++;
+        printf("Writer %ld: Wrote Shared Data = %d\n", (long)arg, shared_data);
+
+        // Unlock the write semaphore
+        sem_post(&wrt);
+
+        // Sleep for a random time to simulate variable writing time
+        usleep(rand() % 1000000);
+    }
+}
+
+int main() {
+    // Initialize semaphores
+    sem_init(&mutex, 0, 1);
+    sem_init(&wrt, 0, 1);
+
+    // Create threads
+    pthread_t reader_thread1, reader_thread2, writer_thread1, writer_thread2;
+    pthread_create(&reader_thread1, NULL, reader, (void *)1);
+    pthread_create(&reader_thread2, NULL, reader, (void *)2);
+    pthread_create(&writer_thread1, NULL, writer, (void *)1);
+    pthread_create(&writer_thread2, NULL, writer, (void *)2);
+
+    // Wait for threads to finish (this won't happen in this example since the threads run indefinitely)
+    pthread_join(reader_thread1, NULL);
+    pthread_join(reader_thread2, NULL);
+    pthread_join(writer_thread1, NULL);
+    pthread_join(writer_thread2, NULL);
+
+    // Destroy semaphores
+    sem_destroy(&mutex);
+    sem_destroy(&wrt);
+
+    return 0;
+}
