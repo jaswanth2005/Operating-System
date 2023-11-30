@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_RECORDS 100
+
+struct Record {
+    int recordNumber;
+    // Other fields of the record can be added here
+};
+
+struct File {
+    struct Record records[MAX_RECORDS];
+    int currentRecord;
+};
+
+// Function to initialize the file
+void initializeFile(struct File *file) {
+    file->currentRecord = -1;
+}
+
+// Function to add a record to the file
+void addRecord(struct File *file, struct Record record) {
+    if (file->currentRecord < MAX_RECORDS - 1) {
+        file->currentRecord++;
+        file->records[file->currentRecord] = record;
+        printf("Record added successfully.\n");
+    } else {
+        printf("File is full. Cannot add more records.\n");
+    }
+}
+
+// Function to read the next record in the file
+void readNextRecord(struct File *file) {
+    if (file->currentRecord >= 0) {
+        printf("Reading Record %d\n", file->records[file->currentRecord].recordNumber);
+        // Additional processing for the record can be added here
+        file->currentRecord--;
+    } else {
+        printf("No more records to read.\n");
+    }
+}
+
+int main() {
+    struct File file;
+    initializeFile(&file);
+
+    int choice;
+    struct Record newRecord;
+
+    do {
+        printf("\nFile Allocation Strategy Simulation\n");
+        printf("1. Add Record\n");
+        printf("2. Read Next Record\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter Record Number: ");
+                scanf("%d", &newRecord.recordNumber);
+                // Additional fields of the record can be added here
+                addRecord(&file, newRecord);
+                break;
+
+            case 2:
+                readNextRecord(&file);
+                break;
+
+            case 3:
+                printf("Exiting the program.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please enter a valid option.\n");
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
