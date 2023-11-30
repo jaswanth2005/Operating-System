@@ -1,0 +1,72 @@
+#include <stdio.h>
+
+#define MAX_FRAMES 3
+#define MAX_PAGES 20
+
+// Function prototypes
+int isPageInMemory(int page, int *frames, int numFrames);
+void displayFrames(int *frames, int numFrames);
+
+int main() {
+    int frames[MAX_FRAMES];
+    int pageQueue[MAX_PAGES];
+    int numPages, pageFaults = 0, front = 0, rear = 0;
+
+    // Initialize frames and pageQueue
+    for (int i = 0; i < MAX_FRAMES; ++i) {
+        frames[i] = -1;  // -1 indicates an empty frame
+    }
+
+    // Input the number of pages
+    printf("Enter the number of pages: ");
+    scanf("%d", &numPages);
+
+    // Input the page sequence
+    printf("Enter the page sequence (separated by spaces): ");
+    for (int i = 0; i < numPages; ++i) {
+        scanf("%d", &pageQueue[i]);
+    }
+
+    // Simulate FIFO paging technique
+    for (int i = 0; i < numPages; ++i) {
+        int currentPage = pageQueue[i];
+
+        // Check if the page is already in memory
+        if (!isPageInMemory(currentPage, frames, MAX_FRAMES)) {
+            // Page fault, replace the oldest page
+            frames[rear] = currentPage;
+            rear = (rear + 1) % MAX_FRAMES;
+            pageFaults++;
+
+            // Display frames after a page fault
+            printf("Page Fault #%d - Frame Status: ", pageFaults);
+            displayFrames(frames, MAX_FRAMES);
+        }
+    }
+
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+
+    return 0;
+}
+
+// Function to check if a page is in memory
+int isPageInMemory(int page, int *frames, int numFrames) {
+    for (int i = 0; i < numFrames; ++i) {
+        if (frames[i] == page) {
+            return 1; // Page is in memory
+        }
+    }
+    return 0; // Page is not in memory
+}
+
+// Function to display the current frame status
+void displayFrames(int *frames, int numFrames) {
+    for (int i = 0; i < numFrames; ++i) {
+        if (frames[i] == -1) {
+            printf("[ ] ");
+        } else {
+            printf("[%d] ", frames[i]);
+        }
+    }
+    printf("\n");
+}
