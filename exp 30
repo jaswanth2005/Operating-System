@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <pthread.h>
+
+void *printMessage(void *arg) {
+    char *message = (char *)arg;
+    printf("%s\n", message);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+    char *message = "Hello, this is a thread!";
+
+    // Create a thread
+    if (pthread_create(&thread, NULL, printMessage, (void *)message) != 0) {
+        perror("Error creating thread");
+        return -1;
+    }
+
+    // Wait for the thread to finish
+    pthread_join(thread, NULL);
+
+    return 0;
+}
+
+
+#include <stdio.h>
+#include <pthread.h>
+
+void *printNumbers(void *arg) {
+    for (int i = 1; i <= 5; ++i) {
+        printf("%d ", i);
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+
+    // Create a thread
+    if (pthread_create(&thread, NULL, printNumbers, NULL) != 0) {
+        perror("Error creating thread");
+        return -1;
+    }
+
+    // Wait for the thread to finish
+    pthread_join(thread, NULL);
+
+    printf("\nMain thread is done.\n");
+
+    return 0;
+}
+
+
+#include <stdio.h>
+#include <pthread.h>
+
+void *printMessage(void *arg) {
+    printf("Thread ID: %lu\n", pthread_self());
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    // Create two threads
+    pthread_create(&thread1, NULL, printMessage, NULL);
+    pthread_create(&thread2, NULL, printMessage, NULL);
+
+    // Wait for the threads to finish
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    // Compare thread IDs
+    if (pthread_equal(thread1, thread2)) {
+        printf("The threads are equal.\n");
+    } else {
+        printf("The threads are not equal.\n");
+    }
+
+    return 0;
+}
+
+
+#include <stdio.h>
+#include <pthread.h>
+
+void *printNumbers(void *arg) {
+    for (int i = 1; i <= 5; ++i) {
+        printf("%d ", i);
+    }
+    pthread_exit((void *)42);
+}
+
+int main() {
+    pthread_t thread;
+    void *result;
+
+    // Create a thread
+    if (pthread_create(&thread, NULL, printNumbers, NULL) != 0) {
+        perror("Error creating thread");
+        return -1;
+    }
+
+    // Wait for the thread to finish
+    pthread_join(thread, &result);
+
+    printf("\nMain thread is done. Thread returned: %d\n", (int)result);
+
+    return 0;
+}
+
+
+
+
