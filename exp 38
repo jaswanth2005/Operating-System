@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void scanDisk(int request[], int head, int n, char direction) {
+    int distance, seek_sequence[n + 1];
+    
+    // Sort the request array
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (request[j] > request[j + 1]) {
+                // Swap the requests if they are out of order
+                int temp = request[j];
+                request[j] = request[j + 1];
+                request[j + 1] = temp;
+            }
+        }
+    }
+
+    int seek_count = 0;
+    int current_head = head;
+
+    int left = 0, right = n - 1;
+    int index = 0;
+
+    while (index < n) {
+        if (direction == 'left' && request[index] < current_head) {
+            seek_sequence[seek_count++] = current_head - request[index];
+            current_head = request[index];
+            index++;
+        } else if (direction == 'right' && request[index] > current_head) {
+            seek_sequence[seek_count++] = request[index] - current_head;
+            current_head = request[index];
+            index++;
+        } else {
+            if (direction == 'left') {
+                left--;
+            } else if (direction == 'right') {
+                right++;
+            }
+        }
+    }
+
+    // Continue in the opposite direction
+    if (direction == 'left') {
+        for (int i = left; i >= 0; i--) {
+            seek_sequence[seek_count++] = current_head - request[i];
+            current_head = request[i];
+        }
+        direction = 'right';
+    } else if (direction == 'right') {
+        for (int i = right; i < n; i++) {
+            seek_sequence[seek_count++] = request[i] - current_head;
+            current_head = request[i];
+        }
+        direction = 'left';
+    }
+
+    printf("SCAN (Elevator) Disk Scheduling Sequence: ");
+    for (int i = 0; i < seek_count; i++) {
+        printf("%d ", seek_sequence[i]);
+    }
+
+    int total_seek_time = 0;
+    for (int i = 0; i < seek_count; i++) {
+        total_seek_time += seek_sequence[i];
+    }
+
+    printf("\nTotal Seek Time: %d\n", total_seek_time);
+}
+
+int main() {
+    int n, head;
+
+    printf("Enter the number of requests: ");
+    scanf("%d", &n);
+
+    int request[n];
+
+    printf("Enter the request sequence:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Request %d: ", i + 1);
+        scanf("%d", &request[i]);
+    }
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &head);
+
+    char direction;
+    printf("Enter the initial direction (left or right): ");
+    scanf("%s", &direction);
+
+    scanDisk(request, head, n, direction);
+
+    return 0;
+}
+
